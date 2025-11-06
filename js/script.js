@@ -25,7 +25,18 @@ formulario.addEventListener('submit', function(evento) {
     const telefone = document.getElementById('telefone').value;
     const data = document.getElementById('data').value;
     const hora = document.getElementById('hora').value;
+    
+const existeAgendamento = agendamentos.some(
+        (ag) => ag.data === data && ag.hora === hora
+    );
 
+    if (existeAgendamento) {
+        alert("⚠️ Já existe um agendamento para essa data e horário! Escolha outro horário.");
+        document.getElementById('hora').value = ""; // limpa campo hora
+        return; // interrompe antes de adicionar
+    }
+
+   
     // Cria um objeto com os dados do cliente
     const novoAgendamento = {
         nome: nome,
