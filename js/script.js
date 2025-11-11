@@ -7,6 +7,7 @@ let agendamentos = [];
 
 // ====== CARREGAR AGENDAMENTOS SALVOS AO ABRIR A PÁGINA ======
 window.addEventListener('load', function() {
+    apagarAgendamentosAntigos();
     const agendamentosSalvos = localStorage.getItem('agendamentos');
     if (agendamentosSalvos) {
         agendamentos = JSON.parse(agendamentosSalvos);
@@ -23,6 +24,12 @@ formulario.addEventListener('submit', function(evento) {
     const telefone = document.getElementById('telefone').value.trim();
     const data = document.getElementById('data').value.trim();
     const hora = document.getElementById('hora').value.trim();
+
+    // ====== VALIDA SE A DATA INSERIDA JÁ PASSOU ======
+    if (!validarDataAgendamento(data)) {
+        document.getElementById('data').value = ""; // limpa o campo data
+        return; // interrompe o processo de agendamento
+    }
 
     // Normaliza a hora (garante sempre formato HH:MM)
     const horaNormalizada = hora.padStart(5, '0');
@@ -83,4 +90,39 @@ function excluirAgendamento(indice) {
 // ====== SALVAR AGENDAMENTOS NO NAVEGADOR ======
 function salvarAgendamentos() {
     localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+}
+
+// ====== APAGAR AGENDAMENTOS ANTIGOS AUTOMATICAMENTE ======
+function apagarAgendamentosAntigos() {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    let agendamentosSalvos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+
+    const agendamentosAtuais = agendamentosSalvos.filter(agendamento => {
+        const dataAgendamento = new Date(agendamento.data);
+        dataAgendamento.setHours(0, 0, 0, 0);
+        return dataAgendamento >= hoje;
+    });
+
+    if (agendamentosAtuais.length !== agendamentosSalvos.length) {
+        localStorage.setItem('agendamentos', JSON.stringify(agendamentosAtuais));
+        console.log('🧹 Agendamentos antigos foram removidos automaticamente.');
+    }
+}
+
+// ====== VALIDA SE A DATA INSERIDA É PASSADA ======
+function validarDataAgendamento(dataInserida) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const dataAgendada = new Date(dataInserida);
+    dataAgendada.setHours(0, 0, 0, 0);
+
+    if (dataAgendada < hoje) {
+        alert('❌ Data inválida! A data inserida já passou.');
+        return false;
+    }
+
+    return true;
 }
